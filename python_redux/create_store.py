@@ -27,7 +27,7 @@ ACTION_TYPES = {
  * @returns {Store} A Redux store that lets you read the state, dispatch actions
  * and subscribe to changes.
 """
-def create_store(reducer, preloaded_state=None, enhancer=None):
+def create_store(reducer=None, preloaded_state=None, enhancer=None):
 	if hasattr(preloaded_state, '__call__') and enhancer is None:
 		enhancer = preloaded_state
 		preloaded_state = None
@@ -41,12 +41,13 @@ def create_store(reducer, preloaded_state=None, enhancer=None):
 		raise Exception('Expected the reducer to be a function')
 		
 	current_reducer = reducer
-	current_state = [preloaded_state]
+	current_state = preloaded_state
 	current_listeners = []
 	next_listeners = current_listeners
-	is_dispatching = [False]
+	is_dispatching = False
 	
 	def ensure_can_mutate_next_listeners():
+		nonlocal next_listeners, current_listeners
 		if next_listeners == current_listeners:
 			next_listeners = [c for c in current_listeners]
 	
@@ -56,7 +57,8 @@ def create_store(reducer, preloaded_state=None, enhancer=None):
 	 * @returns {any} The current state tree of your application.
 	"""
 	def get_state():
-		return current_state[0]
+		nonlocal current_state
+		return current_state
 	
 	"""
 	 * Adds a change listener. It will be called any time an action is dispatched,
@@ -82,6 +84,7 @@ def create_store(reducer, preloaded_state=None, enhancer=None):
 	 * @returns {Function} A function to remove this change listener.
 	"""
 	def subscribe(listener):
+		nonlocal next_listeners
 		if not hasattr(listener, '__call__'):
 			raise Exception('Expected listener to be a function')
 		
@@ -90,9 +93,10 @@ def create_store(reducer, preloaded_state=None, enhancer=None):
 		next_listeners.append(listener)
 		
 		def unsubscribe():
+			nonlocal is_subscribed
 			if not is_subscribed:
 				return
-			is_subscribed = false
+			is_subscribed = False
 			ensure_can_mutate_next_listeners()
 			index = next_listeners.index(listener)
 			del next_listeners[index]
@@ -125,18 +129,19 @@ def create_store(reducer, preloaded_state=None, enhancer=None):
 	 * return something else (for example, a Promise you can await).
 	"""
 	def dispatch(action):
+		nonlocal is_dispatching, current_state, current_listeners, next_listeners
 		if not type(action) == dict:
 			raise Exception('Actions must be plain dictionaries.  Consider adding middleware to change this')
 		if not action.get('type'):
 			raise Exception('Actions may not have have an undefined "type" property.\n Have you misspelled a constants?')
-		if is_dispatching[0]:
+		if is_dispatching:
 			raise Exception('Reducers may not dispatch actions')
 		
 		try:
-			is_dispatching[0] = True
-			current_state[0] = current_reducer(current_state[0], action)
+			is_dispatching = True
+			current_state = current_reducer(current_state, action)
 		finally:
-			is_dispatching[0] = False
+			is_dispatching = False
 		
 		listeners = current_listeners = next_listeners
 		for l in listeners:
@@ -154,6 +159,7 @@ def create_store(reducer, preloaded_state=None, enhancer=None):
 	 * @returns {void}
 	"""
 	def replace_reducer(next_reducer):
+		nonlocal current_reducer
 		if not hasattr(next_reducer, '__call__'):
 			raise Exception('Expected next_reducer to be a function')
 		current_reducer = next_reducer

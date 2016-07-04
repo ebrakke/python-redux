@@ -1,7 +1,10 @@
-from action_types import ADD_TODO, DISPATCH_IN_MIDDLE, THROW_ERROR
+from test.helpers.action_types import ADD_TODO, DISPATCH_IN_MIDDLE, THROW_ERROR
 
 def id(state = []):
-	return reduce(lambda result, item: item.get('id') if item.get('id') > result else result, state, 0) + 1
+	id = 0
+	for item in state:
+		id = item.get('id')
+	return id + 1
 
 def todos(state=None, action={}):
 	if state is None:

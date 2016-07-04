@@ -1,4 +1,4 @@
-from action_types import ADD_TODO, DISPATCH_IN_MIDDLE, THROW_ERROR, UNKNOWN_ACTION
+from test.helpers.action_types import ADD_TODO, DISPATCH_IN_MIDDLE, THROW_ERROR, UNKNOWN_ACTION
 
 def add_todo(text):
   return {'type': ADD_TODO, 'text': text}

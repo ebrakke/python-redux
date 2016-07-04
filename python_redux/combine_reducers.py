@@ -1,4 +1,4 @@
-from utils.warning import warning
+from python_redux.utils.warning import warning
 from random import choice
 
 ACTION_TYPES = {
@@ -8,8 +8,7 @@ ACTION_TYPES = {
 def get_undefined_state_error_message(key, action):
 	action_type = action and action['type']
 	action_name = action_type and str(action_type) or 'an action'
-	
-	return 'Given action {}, reducer {} returned None.  To ignore an action you must return the previous state'
+	return 'Given action {}, reducer {} returned None.  To ignore an action you must return the previous state'.format(action_name, key)
 
 def get_unexpected_state_shape_warning_message(input_state, reducers, action, unexpected_key_cache):
 	reducer_keys = reducers.keys()
@@ -25,9 +24,9 @@ def get_unexpected_state_shape_warning_message(input_state, reducers, action, un
 			', '.join(reducer_keys)
 		)
 	
-	unexpected_keys = [k for k in input_state.keys() if not reducers.get(key) and not unexpected_key_cache[key]]
+	unexpected_keys = [key for key in input_state.keys() if not reducers.get(key) and not unexpected_key_cache[key]]
 	for key in unexpected_keys:
-		unexpected_key_cache[key] = true
+		unexpected_key_cache[key] = True
 	
 	if len(unexpected_keys) > 0:
 		'Unexpected {} "{}" found in {}. Expected to find one of the known reducer keys instead: "{}". Unexpected keys will be ignored.'.format(
@@ -44,8 +43,8 @@ def assert_reducer_sanity(reducers):
 		
 		if initial_state is None:
 			raise Exception('Reducer "{}" returned undefined during initialization. If the state passed to the reducer is undefined, you must explicitly return the initial state. The initial state may not be undefined.'.format(key))
-		type = '@@redux/PROBE_UNKNOWN_ACTION_{}'.format('.'.join(choice('0123456789ABCDEFGHIJKLM') for i in range(20)))
-		if reducer(None, { 'type': type }) is None:
+		ty = '@@redux/PROBE_UNKNOWN_ACTION_{}'.format('.'.join(choice('0123456789ABCDEFGHIJKLM') for i in range(20)))
+		if reducer(None, { 'type': ty }) is None:
 			raise Exception("""
 			Reducer "{}" returned undefined when probed with a random type.
 			Don't try to handle ${ActionTypes.INIT} or other actions in "redux/*"
@@ -90,7 +89,7 @@ def combine_reducers(reducers):
 	def combination(state=None, action = None):
 		if state is None:
 			state = {}
-		if (sanity_error[0]):
+		if sanity_error[0]:
 			raise sanity_error[0]
 		warning_message = get_unexpected_state_shape_warning_message(state, final_reducers, action, unexpected_key_cache)
 		if warning_message:

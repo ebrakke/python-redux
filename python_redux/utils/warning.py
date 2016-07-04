@@ -5,4 +5,4 @@
  * @returns {void}
 """
 def warning(message):
-  print message
+	print(message)
