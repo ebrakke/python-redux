@@ -83,7 +83,7 @@ def create_store(reducer=None, preloaded_state=None, enhancer=None):
 	 * @param {Function} listener A callback to be invoked on every dispatch.
 	 * @returns {Function} A function to remove this change listener.
 	"""
-	def subscribe(listener):
+	def subscribe(listener=None):
 		nonlocal next_listeners
 		if not hasattr(listener, '__call__'):
 			raise Exception('Expected listener to be a function')
@@ -128,12 +128,12 @@ def create_store(reducer=None, preloaded_state=None, enhancer=None):
 	 * Note that, if you use a custom middleware, it may wrap `dispatch()` to
 	 * return something else (for example, a Promise you can await).
 	"""
-	def dispatch(action):
+	def dispatch(action=None):
 		nonlocal is_dispatching, current_state, current_listeners, next_listeners
 		if not type(action) == dict:
 			raise Exception('Actions must be plain dictionaries.  Consider adding middleware to change this')
-		if not action.get('type'):
-			raise Exception('Actions may not have have an undefined "type" property.\n Have you misspelled a constants?')
+		if action.get('type') is None:
+			raise Exception('Actions may not have an undefined "type" property.\n Have you misspelled a constants?')
 		if is_dispatching:
 			raise Exception('Reducers may not dispatch actions')
 		
@@ -158,16 +158,14 @@ def create_store(reducer=None, preloaded_state=None, enhancer=None):
 	 * @param {Function} nextReducer The reducer for the store to use instead.
 	 * @returns {void}
 	"""
-	def replace_reducer(next_reducer):
+	def replace_reducer(next_reducer=None):
 		nonlocal current_reducer
 		if not hasattr(next_reducer, '__call__'):
 			raise Exception('Expected next_reducer to be a function')
 		current_reducer = next_reducer
 		dispatch({ 'type': ACTION_TYPES['INIT'] })
 	
-	"""
-	TODO: Figure out how to add the observables
-	"""
+	# TODO: Figure out how to add the observables
 	
 	# When a store is created, an "INIT" action is dispatched so that every
 	# reducer returns their initial state. This effectively populates

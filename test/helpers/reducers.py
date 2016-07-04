@@ -3,7 +3,7 @@ from test.helpers.action_types import ADD_TODO, DISPATCH_IN_MIDDLE, THROW_ERROR
 def id(state = []):
 	id = 0
 	for item in state:
-		id = item.get('id')
+		id = item.get('id') if item.get('id') > id else id
 	return id + 1
 
 def todos(state=None, action={}):
