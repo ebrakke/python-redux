@@ -24,7 +24,7 @@ class TestApplyMiddleware(unittest.TestCase):
 		self.assertEqual(sorted(list(args[0].keys())), sorted(['get_state', 'dispatch']))
 		
 		self.assertEqual(store['get_state'](), [dict(id=1, text='Use Redux'), dict(id=2, text='Flux FTW!')])
-
+		
 if __name__ == '__main__':
 	unittest.main()
 		

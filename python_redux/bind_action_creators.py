@@ -25,8 +25,8 @@ def bind_action_creators(action_creators=None, dispatch=None):
 	"""
 	if hasattr(action_creators, '__call__'):
 		return bind_action_creator(action_creators, dispatch)
-	if type(action_creators) != 'dict' or action_creators == None:
-		raise Exception('bindActionCreators expected an object or a function, instead received {}.'.format('null' if action_creators == None else type(action_creators)))
+	if type(action_creators) != dict or action_creators == None:
+		raise Exception('bind_action_creators expected an object or a function, instead received {}.'.format('None' if action_creators == None else type(action_creators)))
 	
 	bound_action_creators = {}
 	for key in action_creators:
