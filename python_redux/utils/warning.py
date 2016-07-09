@@ -1,3 +1,4 @@
+import logging
 """
  * Prints a warning in the console if it exists.
  *
@@ -5,4 +6,4 @@
  * @returns {void}
 """
 def warning(message):
-	print(message)
+	logging.warning(message)
