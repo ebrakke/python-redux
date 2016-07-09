@@ -16,7 +16,7 @@ def apply_middleware(*middlewares):
 	@returns {Function} A store enhancer applying the middleware.
 	"""
 	def chain(create_store):
-		def inner(reducer, preloaded_state, enhancer):
+		def inner(reducer, preloaded_state=None, enhancer=None):
 			store = create_store(reducer, preloaded_state, enhancer)
 			dispatch = store.get('dispatch')
 			chain = []
