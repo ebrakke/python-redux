@@ -1,4 +1,4 @@
-from python_redux.compose import compose
+from .compose import compose
 def apply_middleware(*middlewares):
 	"""Creates a store enhancer that applies middleware to the dispatch method
 	of the Redux store. This is handy for a variety of tasks, such as expressing

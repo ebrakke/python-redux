@@ -1,4 +1,4 @@
-from python_redux.utils.warning import warning
+from .utils.warning import warning
 from random import choice
 
 ACTION_TYPES = {

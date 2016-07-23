@@ -2,8 +2,8 @@ import unittest
 import unittest.mock as mock
 import re
 from python_redux import bind_action_creators, create_store
-from test.helpers.reducers import reducers
-from test.helpers.action_creators import add_todo, add_todo_if_empty, dispatch_in_middle, unknown_action
+from .helpers.reducers import reducers
+from .helpers.action_creators import add_todo, add_todo_if_empty, dispatch_in_middle, unknown_action
 
 todos = reducers['todos']
 action_creators = dict(

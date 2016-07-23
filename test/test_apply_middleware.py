@@ -1,9 +1,9 @@
 import unittest
 import unittest.mock as mock
 from python_redux import create_store, apply_middleware
-from test.helpers.reducers import reducers
-from test.helpers.action_creators import add_todo, add_todo_if_empty
-from test.helpers.middleware import thunk
+from .helpers.reducers import reducers
+from .helpers.action_creators import add_todo, add_todo_if_empty
+from .helpers.middleware import thunk
 
 class TestApplyMiddleware(unittest.TestCase):
 	def test_wraps_dispatch_method_with_middleware_once(self):
