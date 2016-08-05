@@ -2,8 +2,8 @@ import unittest
 import unittest.mock as mock
 
 from python_redux import create_store, combine_reducers
-from .helpers.action_creators import add_todo, dispatch_in_middle, throw_error, unknown_action
-from .helpers.reducers import reducers
+from test.helpers.action_creators import add_todo, dispatch_in_middle, throw_error, unknown_action
+from test.helpers.reducers import reducers
 
 class TestCreateStoreMethod(unittest.TestCase):
 	def test_exposes_public_API(self):
