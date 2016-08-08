@@ -18,7 +18,9 @@ class Store:
 		if enhancer is not None :
 			if not hasattr(enhancer, '__call__'):
 				raise Exception('Expected the enhancer to be a function')
-			# TODO: implement enhancers
+			store = enhancer(reducer, preloaded_state=preloaded_state)
+			self.inherit_from_store(store)
+			return
 		if not hasattr(reducer, '__call__'):
 			raise Exception('Expected the reducer to be a function')
 		
@@ -27,15 +29,24 @@ class Store:
 		self._current_listeners = []
 		self._next_listeners = self._current_listeners
 		self._is_dispatching = False
+		
+		self.dispatch({ 'type': ACTION_TYPES['INIT']})
 	
 	def ensure_can_mutate_next_listeners(self):
 		if self._next_listeners == self._current_listeners:
 			self._next_listeners = [c for c in self._current_listeners]
 	
+	@property
+	def state(self):
+		"""Reads the state tree managed by the store.
+		:return: the current state
+		"""
+		return self._current_state
+	
+	#TODO: Should this be removed in favor of property?
 	def get_state(self):
 		"""Reads the state tree managed by the store.
 		:return: the current state
-		:rtype: Dictionary
 		"""
 		return self._current_state
 	
@@ -58,7 +69,8 @@ class Store:
 				return
 			is_subscribed = False
 			self.ensure_can_mutate_next_listeners()
-			self._next_listeners = [l for l in self._next_listeners if l != listener]
+			index = self._next_listeners.index(listener)
+			del self._next_listeners[index]
 		
 		return unsubscribe
 	
@@ -91,4 +103,11 @@ class Store:
 			raise Exception('Expected next_reducer to be a function')
 		self._current_reducer = next_reducer
 		self.dispatch({ 'type': ACTION_TYPES['INIT'] })
+		
+	def inherit_from_store(self, store):
+		""" Helpful function to copy all attrs from an enhanced Store
+		:param store: The store to copy from
+		"""
+		for key in store.__dict__:
+			setattr(self, key, getattr(store, key))
 	
