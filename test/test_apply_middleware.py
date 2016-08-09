@@ -16,14 +16,14 @@ class TestApplyMiddleware(unittest.TestCase):
 		spy = mock.MagicMock()
 		store = apply_middleware(test(spy), thunk)(create_store)(reducers['todos'])
 		
-		store['dispatch'](add_todo('Use Redux'))
-		store['dispatch'](add_todo('Flux FTW!'))
+		store.dispatch(add_todo('Use Redux'))
+		store.dispatch(add_todo('Flux FTW!'))
 		
 		self.assertEqual(spy.call_count, 1)
 		args, kwargs = spy.call_args
-		self.assertEqual(sorted(list(args[0].keys())), sorted(['get_state', 'dispatch']))
+		self.assertTrue(all([args[0].dispatch, args[0].get_state]))
 		
-		self.assertEqual(store['get_state'](), [dict(id=1, text='Use Redux'), dict(id=2, text='Flux FTW!')])
+		self.assertEqual(store.state, [dict(id=1, text='Use Redux'), dict(id=2, text='Flux FTW!')])
 		
 if __name__ == '__main__':
 	unittest.main()

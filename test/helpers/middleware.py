@@ -1,7 +1,6 @@
 def thunk(store):
-	dispatch = store['dispatch']
-	get_state = store['get_state']
-	
+	dispatch = store.dispatch
+	get_state = store.get_state
 	def apply_middleware(next):
 		def apply_action(action):
 			if hasattr(action, '__call__'):

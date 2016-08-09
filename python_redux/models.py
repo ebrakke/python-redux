@@ -1,28 +1,19 @@
-ACTION_TYPES = {
-	'INIT': '@@redux/INIT'
-}
+from .utils import (
+	is_function, ACTION_TYPES)
+
+from .exceptions import DispatchInMiddle
+
 class Store:
+	"""A Redux Store. Creates a Redux store that holds the state tree.
+	:param self:
+	:param reducer: A function that returns the next state tree, given the current state tree and the action to handle.
+	:param preloaded_state: (optional) Dictionary of the initial state tree
+	"""
 	def __init__(self, reducer, **kwargs):
-		"""Initializer for a Redux Store. Creates a Redux store that holds the state tree.
-		:param self:
-		:param reducer: A function that returns the next state tree, given the current state tree and the action to handle.
-		:param preloaded_state: (optional) Dictionary of the initial state tree
-		:param enhancer: (optional) A function to enhance the store (e.g. apply_middleware)
-		Usage::
-		>>> from python_redux import Store
-		>>> store = Store(reducer)
-		"""
-		enhancer = kwargs.get('enhancer')
 		preloaded_state = kwargs.get('preloaded_state')
 		
-		if enhancer is not None :
-			if not hasattr(enhancer, '__call__'):
-				raise Exception('Expected the enhancer to be a function')
-			store = enhancer(reducer, preloaded_state=preloaded_state)
-			self.inherit_from_store(store)
-			return
-		if not hasattr(reducer, '__call__'):
-			raise Exception('Expected the reducer to be a function')
+		if not is_function(reducer):
+			raise TypeError('Expected the reducer to be a function')
 		
 		self._current_reducer = reducer
 		self._current_state = preloaded_state
@@ -81,11 +72,11 @@ class Store:
 		:rtype: Dictionary
 		"""
 		if not type(action) == dict:
-			raise Exception('Actions must be plain dictionaries.  Consider adding middleware to change this')
+			raise TypeError('Actions must be plain dictionaries.  Consider adding middleware to change this')
 		if action.get('type') is None:
-			raise Exception('Actions may not have an undefined "type" property.\n Have you misspelled a constant?')
+			raise TypeError('Actions may not have an undefined "type" property.\n Have you misspelled a constant?')
 		if self._is_dispatching:
-			raise Exception('Reducers may not dispatch actions')
+			raise DispatchInMiddle('Reducers may not dispatch actions')
 		
 		try:
 			self._is_dispatching = True
@@ -100,14 +91,14 @@ class Store:
 		
 	def replace_reducer(self, next_reducer):
 		if not hasattr(next_reducer, '__call__'):
-			raise Exception('Expected next_reducer to be a function')
+			raise TypeError('Expected next_reducer to be a function')
 		self._current_reducer = next_reducer
 		self.dispatch({ 'type': ACTION_TYPES['INIT'] })
 		
-	def inherit_from_store(self, store):
-		""" Helpful function to copy all attrs from an enhanced Store
-		:param store: The store to copy from
-		"""
-		for key in store.__dict__:
-			setattr(self, key, getattr(store, key))
+
+class MiddlewareAPI:
+	def __init__(self, get_state, dispatch):
+		self.get_state = get_state
+		self.dispatch = dispatch
+		
 	
