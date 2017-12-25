@@ -1,5 +1,5 @@
 ACTION_TYPES = {
-	'INIT': '@@redux/INIT'
+    'INIT': '@@redux/INIT'
 }
 
 """
@@ -27,40 +27,42 @@ ACTION_TYPES = {
  * @returns {Store} A Redux store that lets you read the state, dispatch actions
  * and subscribe to changes.
 """
+
+
 def create_store(reducer=None, preloaded_state=None, enhancer=None):
-	if hasattr(preloaded_state, '__call__') and enhancer is None:
-		enhancer = preloaded_state
-		preloaded_state = None
-	
-	if enhancer is not None:
-		if not hasattr(enhancer, '__call__'):
-			raise Exception('Expected the enhancer to be a function')
-		return enhancer(create_store)(reducer, preloaded_state)
-	
-	if not hasattr(reducer, '__call__'):
-		raise Exception('Expected the reducer to be a function')
-		
-	current_reducer = reducer
-	current_state = preloaded_state
-	current_listeners = []
-	next_listeners = current_listeners
-	is_dispatching = False
-	
-	def ensure_can_mutate_next_listeners():
-		nonlocal next_listeners, current_listeners
-		if next_listeners == current_listeners:
-			next_listeners = [c for c in current_listeners]
-	
-	"""
+    if hasattr(preloaded_state, '__call__') and enhancer is None:
+        enhancer = preloaded_state
+        preloaded_state = None
+
+    if enhancer is not None:
+        if not hasattr(enhancer, '__call__'):
+            raise Exception('Expected the enhancer to be a function')
+        return enhancer(create_store)(reducer, preloaded_state)
+
+    if not hasattr(reducer, '__call__'):
+        raise Exception('Expected the reducer to be a function')
+
+    current_reducer = reducer
+    current_state = preloaded_state
+    current_listeners = []
+    next_listeners = current_listeners
+    is_dispatching = False
+
+    def ensure_can_mutate_next_listeners():
+        nonlocal next_listeners, current_listeners
+        if next_listeners == current_listeners:
+            next_listeners = [c for c in current_listeners]
+
+    """
 	 * Reads the state tree managed by the store.
 	 *
 	 * @returns {any} The current state tree of your application.
 	"""
-	def get_state():
-		nonlocal current_state
-		return current_state
-	
-	"""
+    def get_state():
+        nonlocal current_state
+        return current_state
+
+    """
 	 * Adds a change listener. It will be called any time an action is dispatched,
 	 * and some part of the state tree may potentially have changed. You may then
 	 * call `getState()` to read the current state tree inside the callback.
@@ -83,27 +85,27 @@ def create_store(reducer=None, preloaded_state=None, enhancer=None):
 	 * @param {Function} listener A callback to be invoked on every dispatch.
 	 * @returns {Function} A function to remove this change listener.
 	"""
-	def subscribe(listener=None):
-		nonlocal next_listeners
-		if not hasattr(listener, '__call__'):
-			raise Exception('Expected listener to be a function')
-		
-		is_subscribed = True
-		ensure_can_mutate_next_listeners()
-		next_listeners.append(listener)
-		
-		def unsubscribe():
-			nonlocal is_subscribed
-			if not is_subscribed:
-				return
-			is_subscribed = False
-			ensure_can_mutate_next_listeners()
-			index = next_listeners.index(listener)
-			del next_listeners[index]
-		
-		return unsubscribe
-	
-	"""
+    def subscribe(listener=None):
+        nonlocal next_listeners
+        if not hasattr(listener, '__call__'):
+            raise Exception('Expected listener to be a function')
+
+        is_subscribed = True
+        ensure_can_mutate_next_listeners()
+        next_listeners.append(listener)
+
+        def unsubscribe():
+            nonlocal is_subscribed
+            if not is_subscribed:
+                return
+            is_subscribed = False
+            ensure_can_mutate_next_listeners()
+            index = next_listeners.index(listener)
+            del next_listeners[index]
+
+        return unsubscribe
+
+    """
 	 * Dispatches an action. It is the only way to trigger a state change.
 	 *
 	 * The `reducer` function, used to create the store, will be called with the
@@ -128,27 +130,29 @@ def create_store(reducer=None, preloaded_state=None, enhancer=None):
 	 * Note that, if you use a custom middleware, it may wrap `dispatch()` to
 	 * return something else (for example, a Promise you can await).
 	"""
-	def dispatch(action=None):
-		nonlocal is_dispatching, current_state, current_listeners, next_listeners
-		if not type(action) == dict:
-			raise Exception('Actions must be plain dictionaries.  Consider adding middleware to change this')
-		if action.get('type') is None:
-			raise Exception('Actions may not have an undefined "type" property.\n Have you misspelled a constants?')
-		if is_dispatching:
-			raise Exception('Reducers may not dispatch actions')
-		
-		try:
-			is_dispatching = True
-			current_state = current_reducer(current_state, action)
-		finally:
-			is_dispatching = False
-		
-		listeners = current_listeners = next_listeners
-		for l in listeners:
-			l()
-		return action	
-	
-	"""
+    def dispatch(action=None):
+        nonlocal is_dispatching, current_state, current_listeners, next_listeners
+        if not type(action) == dict:
+            raise Exception(
+                'Actions must be plain dictionaries.  Consider adding middleware to change this')
+        if action.get('type') is None:
+            raise Exception(
+                'Actions may not have an undefined "type" property.\n Have you misspelled a constants?')
+        if is_dispatching:
+            raise Exception('Reducers may not dispatch actions')
+
+        try:
+            is_dispatching = True
+            current_state = current_reducer(current_state, action)
+        finally:
+            is_dispatching = False
+
+        listeners = current_listeners = next_listeners
+        for l in listeners:
+            l()
+        return action
+
+    """
 	 * Replaces the reducer currently used by the store to calculate the state.
 	 *
 	 * You might need this if your app implements code splitting and you want to
@@ -158,23 +162,23 @@ def create_store(reducer=None, preloaded_state=None, enhancer=None):
 	 * @param {Function} nextReducer The reducer for the store to use instead.
 	 * @returns {void}
 	"""
-	def replace_reducer(next_reducer=None):
-		nonlocal current_reducer
-		if not hasattr(next_reducer, '__call__'):
-			raise Exception('Expected next_reducer to be a function')
-		current_reducer = next_reducer
-		dispatch({ 'type': ACTION_TYPES['INIT'] })
-	
-	# TODO: Figure out how to add the observables
-	
-	# When a store is created, an "INIT" action is dispatched so that every
-	# reducer returns their initial state. This effectively populates
-	# the initial state tree.
-	dispatch({ 'type': ACTION_TYPES['INIT'] })
-	
-	return {
-		'dispatch': dispatch,
-		'subscribe': subscribe,
-		'get_state': get_state,
-		'replace_reducer': replace_reducer
-	}
+    def replace_reducer(next_reducer=None):
+        nonlocal current_reducer
+        if not hasattr(next_reducer, '__call__'):
+            raise Exception('Expected next_reducer to be a function')
+        current_reducer = next_reducer
+        dispatch({'type': ACTION_TYPES['INIT']})
+
+    # TODO: Figure out how to add the observables
+
+    # When a store is created, an "INIT" action is dispatched so that every
+    # reducer returns their initial state. This effectively populates
+    # the initial state tree.
+    dispatch({'type': ACTION_TYPES['INIT']})
+
+    return {
+        'dispatch': dispatch,
+        'subscribe': subscribe,
+        'get_state': get_state,
+        'replace_reducer': replace_reducer
+    }

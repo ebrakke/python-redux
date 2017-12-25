@@ -8,21 +8,22 @@
  * from right to left. For example, compose(f, g, h) is identical to doing
  * lambda *args: f(g(h(*args)))
 """
-def compose(*funcs):
-	if len(funcs) == 0:
-		return lambda *args: args[0] if args else None
-	if len(funcs) == 1:
-		return funcs[0]
-	
-	# reverse array so we can reduce from left to right
-	funcs = list(reversed(funcs))
-	last = funcs[0]
-	rest = funcs[1:]
-	
-	def composition(*args):
-		composed = last(*args)
-		for f in rest:
-			composed = f(composed)
-		return composed
-	return composition
 
+
+def compose(*funcs):
+    if len(funcs) == 0:
+        return lambda *args: args[0] if args else None
+    if len(funcs) == 1:
+        return funcs[0]
+
+    # reverse array so we can reduce from left to right
+    funcs = list(reversed(funcs))
+    last = funcs[0]
+    rest = funcs[1:]
+
+    def composition(*args):
+        composed = last(*args)
+        for f in rest:
+            composed = f(composed)
+        return composed
+    return composition
